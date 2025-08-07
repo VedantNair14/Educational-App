@@ -3,265 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EDUCATION APP | Online Learning Platform</title>
+    <title>Education Demo | Free Online Video Courses on Python and Tech</title>
+    <meta name="description" content="Unlock your potential with high-quality, free video courses on Python programming, data science, and more. Start learning with Edu-Reels today.">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- All CSS is now directly inside the HTML file -->
-    <style>
-        :root {
-            --primary-color: #4f46e5;
-            --background-start: #f9fafb;
-            --background-end: #eef2ff;
-            --card-background: #ffffff;
-            --text-primary: #111827;
-            --text-secondary: #4b5563;
-            --border-color: #e5e7eb;
-            --shadow-light: rgba(79, 70, 229, 0.05);
-            --shadow-medium: rgba(79, 70, 229, 0.1);
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(to bottom right, var(--background-start), var(--background-end));
-            color: var(--text-primary);
-            margin: 0;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-
-        /* Header & Navbar */
-        .main-header {
-            background-color: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border-color);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 0;
-            height: 64px;
-        }
-
-        .navbar-brand {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .logo-icon {
-            color: var(--primary-color);
-        }
-
-        .navbar-links {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .nav-link {
-            text-decoration: none;
-            color: var(--text-secondary);
-            font-weight: 500;
-            transition: all 0.2s ease;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-        }
-
-        .nav-link:hover {
-            color: var(--primary-color);
-            background-color: var(--background-end);
-        }
-
-        .login-button {
-            background-color: var(--primary-color);
-            color: #fff;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-        }
-        .login-button:hover {
-            background-color: #4338ca;
-            color: #fff;
-        }
-
-        /* Hero Section */
-        .hero-section {
-            text-align: center;
-            padding: 5rem 0;
-        }
-
-        .hero-section h1 {
-            font-size: 3.75rem;
-            font-weight: 700;
-            line-height: 1.1;
-            margin: 0 0 1rem 0;
-        }
-
-        .hero-section p {
-            font-size: 1.25rem;
-            color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        /* Video Grid */
-        .video-grid {
-            padding: 1rem 0 4rem 0;
-            display: grid;
-            /* This rule creates the multi-column layout */
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 2.5rem;
-        }
-
-        /* Video Card */
-        .video-card {
-            background-color: var(--card-background);
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 4px 6px -1px var(--shadow-light), 0 2px 4px -1px var(--shadow-light);
-        }
-
-        .video-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 10px 15px -3px var(--shadow-medium), 0 4px 6px -2px var(--shadow-medium);
-        }
-
-        .thumbnail-container {
-            position: relative;
-            padding-top: 56.25%; /* 16:9 Aspect Ratio */
-        }
-
-        .thumbnail {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.4s ease;
-        }
-
-        .video-card:hover .thumbnail {
-            transform: scale(1.05);
-        }
-
-        .play-icon-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(79, 70, 229, 0.6);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .video-card:hover .play-icon-overlay {
-            opacity: 1;
-        }
-
-        .play-icon {
-            fill: #ffffff;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-            transform: scale(0.8);
-            transition: transform 0.3s ease;
-        }
-
-        .video-card:hover .play-icon {
-            transform: scale(1);
-        }
-
-        .video-info {
-            padding: 1.25rem 1.5rem;
-            flex-grow: 1;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .video-category {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--primary-color);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 0.5rem;
-        }
-
-        .video-title {
-            font-size: 1.15rem;
-            font-weight: 600;
-            margin: 0 0 0.5rem 0;
-            line-height: 1.4;
-        }
-
-        .video-description {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin: 0;
-        }
-
-        /* Popup Player */
-        .popup {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(17, 24, 39, 0.9);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            backdrop-filter: blur(8px);
-        }
-
-        .video-wrapper {
-            width: 90%;
-            max-width: 1500px;
-            aspect-ratio: 16 / 9;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-        }
-
-        .popup #player {
-            width: 100%;
-            height: 100%;
-            border-radius: 12px;
-        }
-
-        .close-button {
-            position: absolute;
-            top: 20px;
-            right: 30px;
-            font-size: 3rem;
-            color: rgba(255, 255, 255, 0.7);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .close-button:hover {
-            color: #fff;
-            transform: rotate(90deg) scale(1.1);
-        }
-    </style>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
@@ -270,7 +18,7 @@
             <nav class="navbar">
                 <div class="navbar-brand">
                     <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
-                    <span>EDUCTION APP</span>
+                    <span>Edu-Reels</span>
                 </div>
                 <div class="navbar-links">
                     <a href="#" class="nav-link">Courses</a>
@@ -290,7 +38,7 @@
             {% for video in videos %}
                 <div class="video-card" onclick="playVideo('{{ video.filename }}')">
                     <div class="thumbnail-container">
-                        <img class="thumbnail" src="/static/thumbnails/{{ video.filename.rsplit('.', 1)[0] }}.jpg" alt="Thumbnail for {{ video.title }}" loading="lazy">
+                        <img class="thumbnail" src="/static/thumbnails/{{ video.title }}.jpg" alt="Thumbnail for {{ video.title }}" loading="lazy">
                         <div class="play-icon-overlay">
                             <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="currentColor"><path d="M7 6v12l10-6z"></path></svg>
                         </div>
@@ -317,7 +65,11 @@
         const popup = document.getElementById("video-popup");
 
         function playVideo(filename) {
-            player.src = `/video/${filename}`;
+            if (filename.startsWith('http')) {
+                player.src = filename;
+            } else {
+                player.src = `/video/${filename}`;
+            }
             popup.style.display = "flex";
             document.body.style.overflow = 'hidden';
         }
@@ -331,4 +83,3 @@
     </script>
 </body>
 </html>
-
