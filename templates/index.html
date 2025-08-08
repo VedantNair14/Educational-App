@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Education Demo | Free Online Video Courses on Python and Tech</title>
+    <title>Education Demo | Online Video Courses For Students </title>
     <meta name="description" content="Unlock your potential with high-quality, free video courses on Python programming, data science, and more. Start learning with Edu-Reels today.">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,13 +18,18 @@
             <nav class="navbar">
                 <div class="navbar-brand">
                     <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
-                    <span>Edu-Reels</span>
+                    <span>Educational Zone Demo</span>
                 </div>
                 <div class="navbar-links">
-                    <a href="#" class="nav-link">Courses</a>
-                    <a href="#" class="nav-link">My Learning</a>
-                    <a href="#" class="nav-link login-button">Log In</a>
-                </div>
+    <a href="#" class="nav-link">Courses</a>
+    <a href="#" class="nav-link">My Learning</a>
+    {% if user %}
+        <span class="nav-link username">Welcome, {{ user }}</span>
+        <a href="/logout" class="nav-link logout-button">Log Out</a>
+    {% else %}
+        <a href="/login" class="nav-link login-button">Log In</a>
+    {% endif %}
+</div>
             </nav>
             <div class="hero-section">
                 <h1>Unlock Your Potential</h1>
