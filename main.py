@@ -1,14 +1,14 @@
 import os
 import cv2
+import shutil
 from pathlib import Path
-from fastapi import FastAPI, Request, HTTPException, Depends, Form, status
+from fastapi import FastAPI, Request, HTTPException, Depends, Form, status, UploadFile, File
 from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.logger import logger
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
-# --- Security & Authentication ---
+# --- Security & Auth ---
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
@@ -16,14 +16,24 @@ from datetime import datetime, timedelta
 # --- Database Setup (SQLAlchemy) ---
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm.session import Session
+
+# --- Cloudinary Setup ---
+import cloudinary
+import cloudinary.uploader
+
+# IMPORTANT: Add your Cloudinary credentials here
+cloudinary.config( 
+  cloud_name = "YOUR_CLOUD_NAME", 
+  api_key = "YOUR_API_KEY", 
+  api_secret = "YOUR_API_SECRET" 
+)
 
 # --- Security Configuration ---
-SECRET_KEY = "a_very_secret_key_change_this_later" # IMPORTANT: Change this!
+SECRET_KEY = "a_very_secret_key_change_this_later"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token") # This is for API docs, not used directly by us
 
 # --- Database Models ---
 DATABASE_URL = "sqlite:///./videos.db"
@@ -34,7 +44,7 @@ Base = declarative_base()
 class Video(Base):
     __tablename__ = "videos"
     id = Column(Integer, primary_key=True, index=True)
-    filename = Column(String, unique=True, index=True)
+    filename = Column(String, unique=True, index=True) # This will now be the Cloudinary URL
     title = Column(String)
     category = Column(String)
 
@@ -43,6 +53,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True)
     hashed_password = Column(String)
+    role = Column(String, default="student") # 'student' or 'admin'
 
 Base.metadata.create_all(bind=engine)
 
@@ -56,59 +67,51 @@ THUMBNAIL_DIR.mkdir(exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# --- Password & Token Helper Functions ---
+# --- Dependency to get DB session ---
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# --- Auth Helper Functions (Passwords, Tokens) ---
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 def get_password_hash(password):
     return pwd_context.hash(password)
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
+def create_access_token(data: dict):
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-# --- Dependency to Get Current User ---
-async def get_current_user(request: Request):
+# --- Dependencies to Get Current User and Check Role ---
+async def get_current_user(request: Request, db: Session = Depends(get_db)):
     token = request.cookies.get("access_token")
-    if not token:
-        return None
+    if not token: return None
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
-        if username is None:
-            return None
-        return username
+        if username is None: return None
+        user = db.query(User).filter(User.username == username).first()
+        return user
     except JWTError:
         return None
 
-# --- Thumbnail Generation (No changes needed) ---
-def generate_thumbnail(video_path: Path, thumb_path: Path):
-    if thumb_path.exists(): return
-    try:
-        logger.info(f"Generating thumbnail for {video_path.name}...")
-        vid = cv2.VideoCapture(str(video_path))
-        success, image = vid.read()
-        if success:
-            cv2.imwrite(str(thumb_path), image)
-        vid.release()
-    except Exception as e:
-        logger.error(f"Failed to create thumbnail: {e}")
-
-# --- App Startup (No changes needed) ---
-@app.on_event("startup")
-def sync_videos_and_thumbnails():
-    # This logic remains the same
-    pass # You can re-add the sync logic if needed, or manage DB manually
+async def get_current_admin_user(current_user: User = Depends(get_current_user)):
+    if current_user is None or current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to access this page."
+        )
+    return current_user
 
 # --- Routes ---
 @app.get("/", response_class=HTMLResponse)
-async def index(request: Request, user: str = Depends(get_current_user)):
+async def index(request: Request, user: User = Depends(get_current_user)):
     if not user:
         return RedirectResponse(url="/login")
     
@@ -122,17 +125,12 @@ def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 @app.post("/login")
-async def login_for_access_token(request: Request, username: str = Form(...), password: str = Form(...)):
-    db = SessionLocal()
+async def login_for_access_token(request: Request, db: Session = Depends(get_db), username: str = Form(...), password: str = Form(...)):
     user = db.query(User).filter(User.username == username).first()
-    db.close()
     if not user or not verify_password(password, user.hashed_password):
         return templates.TemplateResponse("login.html", {"request": request, "error": "Incorrect username or password"})
-
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
-    )
+    
+    access_token = create_access_token(data={"sub": user.username})
     response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
     response.set_cookie(key="access_token", value=access_token, httponly=True)
     return response
@@ -142,28 +140,55 @@ def register_page(request: Request):
     return templates.TemplateResponse("register.html", {"request": request})
 
 @app.post("/register")
+async def register_user(request: Request, db: Session = Depends(get_db), username: str = Form(...), password: str = Form(...)):
+    user_exists = db.query(User).filter(User.username == username).first()
+    if user_exists:
+        return templates.TemplateResponse("register.html", {"request": request, "error": "Username already exists"})
+    
+    hashed_password = get_password_hash(password)
+    new_user = User(username=username, hashed_password=hashed_password, role="student")
+    db.add(new_user)
+    db.commit()
+    return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+
 @app.get("/logout")
 async def logout():
     response = RedirectResponse(url="/login")
     response.delete_cookie(key="access_token")
     return response
 
-async def register_user(request: Request, username: str = Form(...), password: str = Form(...)):
-    db = SessionLocal()
-    user_exists = db.query(User).filter(User.username == username).first()
-    if user_exists:
-        return templates.TemplateResponse("register.html", {"request": request, "error": "Username already exists"})
-    
-    hashed_password = get_password_hash(password)
-    new_user = User(username=username, hashed_password=hashed_password)
-    db.add(new_user)
-    db.commit()
-    db.close()
-    return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+# --- Protected Upload Routes ---
+@app.get("/upload", response_class=HTMLResponse)
+async def upload_page(request: Request, user: User = Depends(get_current_admin_user)):
+    return templates.TemplateResponse("upload.html", {"request": request, "user": user})
 
-@app.get("/video/{filename}")
-async def video(filename: str):
-    file_path = VIDEO_DIR / filename
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="File not found")
-    return FileResponse(file_path)
+@app.post("/upload")
+async def handle_video_upload(
+    request: Request,
+    title: str = Form(...),
+    category: str = Form(...),
+    video_file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_admin_user)
+):
+    try:
+        upload_result = cloudinary.uploader.upload(
+            video_file.file,
+            resource_type="video",
+            folder="educational_videos"
+        )
+        video_url = upload_result.get("secure_url")
+
+        new_video = Video(
+            filename=video_url,
+            title=title,
+            category=category
+        )
+        db.add(new_video)
+        db.commit()
+        
+    except Exception as e:
+        logger.error(f"Upload failed: {e}")
+        return templates.TemplateResponse("upload.html", {"request": request, "user": user, "error": "Upload failed. Please try again."})
+
+    return RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)

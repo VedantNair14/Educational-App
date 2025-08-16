@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Video - Educational Zone</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="auth-container">
+        <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data" class="auth-form" onsubmit="showLoader()">
+            <h2>Upload New Video</h2>
+            
+            <div id="loader" class="loader-container" style="display: none;">
+                <div class="loader-spinner"></div>
+                <p>Uploading, please wait... This may take a few minutes.</p>
+            </div>
+
+            {% if error %}
+            <p class="error-message">{{ error }}</p>
+            {% endif %}
+
+            <div id="form-content">
+                <div class="form-group">
+                    <label for="title">Video Title</label>
+                    <input type="text" id="title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <input type="text" id="category" name="category" required>
+                </div>
+                <div class="form-group">
+                    <label for="video_file">Video File</label>
+                    <input type="file" id="video_file" name="video_file" accept="video/mp4,video/x-m4v,video/*" required>
+                </div>
+                <button id="upload-button" type="submit">Upload Video</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function showLoader() {
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('form-content').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

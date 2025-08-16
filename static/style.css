@@ -129,7 +129,6 @@ body {
 .hero-section {
     text-align: center;
     padding: 6rem 0;
-    background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"%3E%3Cpath fill="%23e6e6fa" fill-opacity="0.3" d="M0,64L48,80C96,96,192,128,288,128C384,128,480,96,576,85.3C672,75,768,85,864,106.7C960,128,1056,160,1152,176C1248,192,1344,192,1392,192L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"%3E%3C/path%3E%3C/svg%3E');
     background-size: cover;
 }
 
@@ -365,7 +364,6 @@ body {
     margin-top: 0;
     margin-bottom: 2.5rem;
     font-size: 2rem;
-    color: var(--text-primary);
     background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
     -webkit-background-clip: text;
     background-clip: text;
@@ -460,4 +458,30 @@ body {
     50% { transform: translateX(5px); }
     75% { transform: translateX(-5px); }
     100% { transform: translateX(0); }
+}
+
+/* === ADD THIS CODE AT THE BOTTOM === */
+/* Loading Spinner Styling */
+.loader-container {
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+.loader-spinner {
+    border: 5px solid #f3f3f3; /* Light grey */
+    border-top: 5px solid var(--primary-color); /* Blue */
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem auto;
+}
+.loader-container p {
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+/* Add the 'spin' animation if it's not already in a shared keyframes section */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

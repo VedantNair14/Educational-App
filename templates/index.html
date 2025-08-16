@@ -18,18 +18,23 @@
             <nav class="navbar">
                 <div class="navbar-brand">
                     <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
-                    <span>Educational Zone Demo</span>
+                    <span>Educational Zone </span>
                 </div>
+                <!-- THIS NAVBAR SECTION IS NOW CORRECTED -->
                 <div class="navbar-links">
-    <a href="#" class="nav-link">Courses</a>
-    <a href="#" class="nav-link">My Learning</a>
-    {% if user %}
-        <span class="nav-link username">Welcome, {{ user }}</span>
-        <a href="/logout" class="nav-link logout-button">Log Out</a>
-    {% else %}
-        <a href="/login" class="nav-link login-button">Log In</a>
-    {% endif %}
-</div>
+                    <a href="#" class="nav-link">Courses</a>
+                    <a href="#" class="nav-link">My Learning</a>
+                    {% if user %}
+                        <!-- This line checks if the user's role is 'admin' -->
+                        {% if user.role == 'admin' %}
+                        <a href="/upload" class="nav-link">Upload</a>
+                        {% endif %}
+                        <span class="nav-link username">Welcome, {{ user.username }}</span>
+                        <a href="/logout" class="nav-link logout-button">Log Out</a>
+                    {% else %}
+                        <a href="/login" class="nav-link login-button">Log In</a>
+                    {% endif %}
+                </div>
             </nav>
             <div class="hero-section">
                 <h1>Unlock Your Potential !</h1>
