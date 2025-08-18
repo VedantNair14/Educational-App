@@ -22,13 +22,12 @@ from sqlalchemy.orm.session import Session
 import cloudinary
 import cloudinary.uploader
 
-# IMPORTANT: Add your Cloudinary credentials here
+# This securely reads your credentials from Render's Environment Variables
 cloudinary.config( 
-  cloud_name = "YOUR_CLOUD_NAME", 
-  api_key = "YOUR_API_KEY", 
-  api_secret = "YOUR_API_SECRET" 
+  cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME'), 
+  api_key = os.environ.get('CLOUDINARY_API_KEY'), 
+  api_secret = os.environ.get('CLOUDINARY_API_SECRET')
 )
-
 # --- Security Configuration ---
 SECRET_KEY = "a_very_secret_key_change_this_later"
 ALGORITHM = "HS256"
