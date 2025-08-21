@@ -46,6 +46,7 @@ class Video(Base):
     filename = Column(String, unique=True, index=True) # This will now be the Cloudinary URL
     title = Column(String)
     category = Column(String)
+    language = Column(String, default="English")    
 
 class User(Base):
     __tablename__ = "users"
@@ -110,15 +111,25 @@ async def get_current_admin_user(current_user: User = Depends(get_current_user))
 
 # --- Routes ---
 @app.get("/", response_class=HTMLResponse)
-async def index(request: Request, user: User = Depends(get_current_user)):
+async def index(request: Request, user: User = Depends(get_current_user), lang: str = None):
     if not user:
         return RedirectResponse(url="/login")
-    
-    db = SessionLocal()
-    videos_data = db.query(Video).all()
-    db.close()
-    return templates.TemplateResponse("index.html", {"request": request, "videos": videos_data, "user": user})
 
+    db = SessionLocal()
+
+    # Get all unique languages from the database for the filter links
+    languages_query = db.query(Video.language).distinct().all()
+    # The query returns tuples, so we extract the first element of each tuple
+    languages = [lang[0] for lang in languages_query if lang[0] is not None]
+
+    # Filter videos if a language is selected
+    if lang and lang != "All":
+        videos_data = db.query(Video).filter(Video.language == lang).all()
+    else:
+        videos_data = db.query(Video).all() # Show all videos by default
+
+    db.close()
+    return templates.TemplateResponse("index.html", {"request": request, "videos": videos_data, "user": user, "languages": languages, "current_lang": lang or "All"})
 @app.get("/login", response_class=HTMLResponse)
 def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
@@ -166,6 +177,7 @@ async def handle_video_upload(
     request: Request,
     title: str = Form(...),
     category: str = Form(...),
+    language: str = Form(...),
     video_file: UploadFile = File(...),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_admin_user)
@@ -181,7 +193,8 @@ async def handle_video_upload(
         new_video = Video(
             filename=video_url,
             title=title,
-            category=category
+            category=category,
+            language=language
         )
         db.add(new_video)
         db.commit()

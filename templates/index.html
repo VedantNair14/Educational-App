@@ -20,12 +20,29 @@
                     <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
                     <span>Educational Zone </span>
                 </div>
-                <!-- THIS NAVBAR SECTION IS NOW CORRECTED -->
+                
                 <div class="navbar-links">
                     <a href="#" class="nav-link">Courses</a>
                     <a href="#" class="nav-link">My Learning</a>
+                    
+                    <!-- NEW DROPDOWN STRUCTURE -->
+                    <div class="dropdown">
+                        <button onclick="toggleDropdown()" class="dropdown-btn">
+                            Language
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                            </svg>
+                        </button>
+                        <div id="language-dropdown" class="dropdown-content">
+                            <a href="/">All</a>
+                            {% for lang_name in languages %}
+                                <a href="/?lang={{ lang_name }}">{{ lang_name }}</a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <!-- END OF NEW DROPDOWN -->
+
                     {% if user %}
-                        <!-- This line checks if the user's role is 'admin' -->
                         {% if user.role == 'admin' %}
                         <a href="/upload" class="nav-link">Upload</a>
                         {% endif %}
@@ -70,6 +87,7 @@
         </div>
     </div>
 
+    <!-- SCRIPT SECTION WITH DROPDOWN JAVASCRIPT ADDED -->
     <script>
         const player = document.getElementById("player");
         const popup = document.getElementById("video-popup");
@@ -89,6 +107,25 @@
             player.pause();
             player.src = "";
             document.body.style.overflow = 'auto';
+        }
+
+        /* JAVASCRIPT FOR THE DROPDOWN */
+        function toggleDropdown() {
+            document.getElementById("language-dropdown").classList.toggle("show");
+        }
+
+        // Close the dropdown if the user clicks outside of it
+        window.onclick = function(event) {
+            // Check if the click was outside the dropdown button
+            if (!event.target.closest('.dropdown-btn')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
         }
     </script>
 </body>
