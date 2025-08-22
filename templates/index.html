@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Education Demo | Online Video Courses For Students </title>
-    <meta name="description" content="Unlock your potential with high-quality, free video courses on Python programming, data science, and more. Start learning with Edu-Reels today.">
+    <meta name="description" content="Unlock your potential with high-quality, free video courses on Python programming, data science, and more. Start learning today.">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,6 +21,15 @@
                     <span>Educational Zone </span>
                 </div>
                 
+                <!-- Hamburger Menu Button for Mobile -->
+                <button class="menu-toggle" onclick="toggleMenu()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+
                 <div class="navbar-links">
                     <a href="#" class="nav-link">Courses</a>
                     <a href="#" class="nav-link">My Learning</a>
@@ -87,10 +96,11 @@
         </div>
     </div>
 
-    <!-- SCRIPT SECTION WITH DROPDOWN JAVASCRIPT ADDED -->
+    <!-- SCRIPT SECTION WITH DROPDOWN AND MENU JAVASCRIPT ADDED -->
     <script>
         const player = document.getElementById("player");
         const popup = document.getElementById("video-popup");
+        const navbarLinks = document.querySelector(".navbar-links");
 
         function playVideo(filename) {
             if (filename.startsWith('http')) {
@@ -116,7 +126,6 @@
 
         // Close the dropdown if the user clicks outside of it
         window.onclick = function(event) {
-            // Check if the click was outside the dropdown button
             if (!event.target.closest('.dropdown-btn')) {
                 var dropdowns = document.getElementsByClassName("dropdown-content");
                 for (var i = 0; i < dropdowns.length; i++) {
@@ -127,6 +136,18 @@
                 }
             }
         }
+
+        /* JAVASCRIPT FOR THE MOBILE MENU */
+        function toggleMenu() {
+            navbarLinks.classList.toggle("active");
+        }
+
+        // Close the menu if the user clicks outside of it
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.navbar') && navbarLinks.classList.contains('active')) {
+                navbarLinks.classList.remove('active');
+            }
+        });
     </script>
 </body>
 </html>
