@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload Video - Educational Zone</title>
     <link rel="stylesheet" href="/static/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,36 +20,99 @@
             </div>
 
             {% if error %}
-            <p class="error-message">{{ error }}</p>
+            <div class="error-message">{{ error }}</div>
             {% endif %}
 
             <div id="form-content">
                 <div class="form-group">
-                    <label for="title">Video Title</label>
-                    <input type="text" id="title" name="title" required>
+                    <label for="title">Lesson Title</label>
+                    <input type="text" id="title" name="title" required placeholder="e.g., Introduction to Python">
                 </div>
+                
                 <div class="form-group">
                     <label for="category">Category</label>
-                    <input type="text" id="category" name="category" required>
+                    <input type="text" id="category" name="category" required placeholder="e.g., Programming, Data Science">
                 </div>
-                <div class="form-group">
-                    <label for="video_file">Video File</label>
-                    <input type="file" id="video_file" name="video_file" accept="video/mp4,video/x-m4v,video/*" required>
-                </div>
+                
                 <div class="form-group">
                     <label for="language">Language</label>
                     <input type="text" id="language" name="language" required placeholder="e.g., English, Hindi, Marathi">
                 </div>
+                
+                <div class="form-group">
+                    <label for="video_file">Video File</label>
+                    <input type="file" id="video_file" name="video_file" accept="video/*" required>
+                    <small style="color: var(--text-secondary); font-size: 0.8rem; display: block; margin-top: 0.5rem;">
+                        Supported formats: MP4, AVI, MOV, WebM. Max size: 100MB
+                    </small>
+                </div>
+                
                 <button id="upload-button" type="submit">Upload Video</button>
+                
+                <div style="margin-top: 1rem; text-align: center;">
+                    <a href="/" style="color: var(--primary-color); text-decoration: none; font-weight: 500;">
+                        ← Back to Dashboard
+                    </a>
+                </div>
             </div>
         </form>
     </div>
 
     <script>
         function showLoader() {
+            // Validate file size before showing loader
+            const fileInput = document.getElementById('video_file');
+            const file = fileInput.files[0];
+            
+            if (file) {
+                // Check file size (100MB = 100 * 1024 * 1024 bytes)
+                const maxSize = 100 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    alert('File size too large. Please select a file smaller than 100MB.');
+                    return false;
+                }
+                
+                // Check file type
+                const allowedTypes = ['video/mp4', 'video/avi', 'video/mov', 'video/webm', 'video/quicktime', 'video/x-msvideo'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Invalid file type. Please select a valid video file.');
+                    return false;
+                }
+            }
+            
+            // Show loader and hide form
             document.getElementById('loader').style.display = 'block';
             document.getElementById('form-content').style.display = 'none';
+            document.getElementById('upload-button').disabled = true;
+            
+            return true;
         }
+        
+        // Add file validation on file select
+        document.getElementById('video_file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Display file info
+                const fileInfo = document.createElement('div');
+                fileInfo.style.marginTop = '0.5rem';
+                fileInfo.style.fontSize = '0.8rem';
+                fileInfo.style.color = 'var(--text-secondary)';
+                fileInfo.innerHTML = `
+                    Selected: ${file.name}<br>
+                    Size: ${(file.size / (1024 * 1024)).toFixed(2)} MB<br>
+                    Type: ${file.type}
+                `;
+                
+                // Remove previous file info if exists
+                const existingInfo = e.target.parentNode.querySelector('.file-info');
+                if (existingInfo) {
+                    existingInfo.remove();
+                }
+                
+                fileInfo.className = 'file-info';
+                e.target.parentNode.appendChild(fileInfo);
+            }
+        });
     </script>
 </body>
 </html>

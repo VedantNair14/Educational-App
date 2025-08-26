@@ -68,21 +68,45 @@
             </div>
         </div>
     </header>
-
     <main class="container">
         <div class="video-grid">
-            {% for video in videos %}
-                <div class="video-card" onclick="playVideo('{{ video.filename }}')">
-                    <div class="thumbnail-container">
-                        <img class="thumbnail" src="/static/thumbnails/{{ video.title }}.jpg" alt="Thumbnail for {{ video.title }}" loading="lazy">
+            <!-- The loop variable is 'lesson', not 'video' -->
+            {% for lesson in lessons %} 
+                <!-- The video-card div wraps everything -->
+                <div class="video-card">
+                    <div class="thumbnail-container" onclick="showLanguageSelector('lesson-{{ lesson.id }}')">
+                        <img class="thumbnail" src="https://res.cloudinary.com/df5edlmgq/video/upload/w_400,q_auto,f_auto/{{ lesson.videos[0].public_id if lesson.videos else '' }}.jpg" alt="Thumbnail for {{ lesson.title }}" loading="lazy">
                         <div class="play-icon-overlay">
                             <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="currentColor"><path d="M7 6v12l10-6z"></path></svg>
                         </div>
                     </div>
                     <div class="video-info">
-                        <span class="video-category">{{ video.category }}</span>
-                        <h3 class="video-title">{{ video.title }}</h3>
-                        <p class="video-description">Dive deep into this topic with our expert-led video guide.</p>
+                        <span class="video-category">{{ lesson.category }}</span>
+                        <h3 class="video-title">{{ lesson.title }}</h3>
+                        <p class="video-description">
+                            Available in: 
+                            {% for video in lesson.videos %}
+                                {{ video.language }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        </p>
+                        <!-- Correctly placed Delete Form -->
+                        {% if user.role == 'admin' %}
+                        <div class="admin-actions">
+                            <form action="/lesson/{{ lesson.id }}/delete" method="post" onsubmit="return confirm('Are you sure you want to delete this lesson and all its videos?');">
+                                <button type="submit" class="delete-button">Delete</button>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <!-- Hidden language selector for each lesson -->
+                    <div id="lesson-{{ lesson.id }}" class="language-selector-popup" style="display:none;">
+                        <div class="language-selector-content">
+                            <h4>Select Language</h4>
+                            {% for video in lesson.videos %}
+                                <button onclick="playVideo('{{ video.video_url }}')">{{ video.language }}</button>
+                            {% endfor %}
+                            <button class="close-lang-selector" onclick="hideLanguageSelector('lesson-{{ lesson.id }}')">Close</button>
+                        </div>
                     </div>
                 </div>
             {% endfor %}
@@ -103,6 +127,9 @@
         const navbarLinks = document.querySelector(".navbar-links");
 
         function playVideo(filename) {
+            // Hide language selectors before playing
+            document.querySelectorAll('.language-selector-popup').forEach(p => p.style.display = 'none');
+            
             if (filename.startsWith('http')) {
                 player.src = filename;
             } else {
@@ -117,6 +144,14 @@
             player.pause();
             player.src = "";
             document.body.style.overflow = 'auto';
+        }
+
+        function showLanguageSelector(lessonId) {
+            document.getElementById(lessonId).style.display = 'flex';
+        }
+
+        function hideLanguageSelector(lessonId) {
+            document.getElementById(lessonId).style.display = 'none';
         }
 
         /* JAVASCRIPT FOR THE DROPDOWN */
