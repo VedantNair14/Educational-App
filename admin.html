@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Approval Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        /* Basic styling for the dashboard */
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 1rem;
+        }
+        #pending-videos-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        .video-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .video-card video {
+            width: 100%;
+            border-radius: 4px;
+        }
+        .video-card .actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        .video-card button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .approve-btn {
+            background-color: #28a745;
+            color: white;
+        }
+        .reject-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pending Video Approvals</h1>
+        <div id="pending-videos-list">
+            <p>Loading pending videos...</p>
+        </div>
+    </div>
+
+    <script>
+        // This function runs when the page is fully loaded
+        document.addEventListener('DOMContentLoaded', fetchPendingVideos);
+
+        // Fetches the list of pending videos from your API
+        async function fetchPendingVideos() {
+            const listContainer = document.getElementById('pending-videos-list');
+            try {
+                const response = await fetch('/api/admin/pending-videos');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch videos.');
+                }
+                const videos = await response.json();
+                
+                listContainer.innerHTML = ''; // Clear the "Loading..." message
+
+                if (videos.length === 0) {
+                    listContainer.innerHTML = '<p>No videos are currently pending approval. Great job! ✅</p>';
+                    return;
+                }
+
+                // Creates a card for each pending video
+                videos.forEach(video => {
+                    const videoCard = document.createElement('div');
+                    videoCard.className = 'video-card';
+                    videoCard.id = `video-card-${video.id}`; // Give each card a unique ID
+                    
+                    videoCard.innerHTML = `
+                        <h3>${video.lesson.title}</h3>
+                        <p><strong>Language:</strong> ${video.language}</p>
+                        <video controls preload="metadata">
+                            <source src="${video.video_url}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        <div class="actions">
+                            <button class="approve-btn" onclick="updateStatus(${video.id}, 'approved')">Approve</button>
+                            <button class="reject-btn" onclick="updateStatus(${video.id}, 'rejected')">Reject</button>
+                        </div>
+                    `;
+                    listContainer.appendChild(videoCard);
+                });
+
+            } catch (error) {
+                console.error('Error:', error);
+                listContainer.innerHTML = '<p style="color: red;">Could not load videos. Please check the server connection and try again.</p>';
+            }
+        }
+
+        // Sends the approval or rejection request to your API
+        async function updateStatus(videoId, status) {
+            try {
+                const response = await fetch(`/api/admin/videos/${videoId}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: status })
+                });
+
+                if (response.ok) {
+                    alert(`Video has been ${status}!`);
+                    // Remove the card from the view instead of reloading everything
+                    const cardToRemove = document.getElementById(`video-card-${videoId}`);
+                    if (cardToRemove) {
+                        cardToRemove.remove();
+                    }
+                    // Check if the list is now empty
+                    if (document.getElementById('pending-videos-list').childElementCount === 0) {
+                        document.getElementById('pending-videos-list').innerHTML = '<p>No videos are currently pending approval. Great job! ✅</p>';
+                    }
+                } else {
+                    throw new Error(`Failed to ${status} the video.`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>

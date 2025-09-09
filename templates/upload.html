@@ -3,114 +3,386 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Video - Educational Zone</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <title>Upload Video - Educational Platform</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .upload-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        
+        .file-upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            transition: border-color 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .file-upload-area:hover {
+            border-color: #007bff;
+        }
+        
+        .file-upload-area.dragover {
+            border-color: #007bff;
+            background-color: #f0f8ff;
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            color: #ccc;
+            margin-bottom: 1rem;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+        
+        .submit-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .alert-error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .role-badge {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .role-badge.admin {
+            background: #dc3545;
+        }
+        
+        .role-badge.teacher {
+            background: #28a745;
+        }
+        
+        .upload-progress {
+            display: none;
+            margin-top: 1rem;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007bff, #0056b3);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: #007bff;
+            text-decoration: none;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        .info-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .info-box h4 {
+            margin: 0 0 0.5rem 0;
+            color: #495057;
+        }
+        
+        .info-box ul {
+            margin: 0;
+            padding-left: 1.25rem;
+        }
+        
+        .info-box li {
+            color: #6c757d;
+            margin-bottom: 0.25rem;
+        }
+    </style>
 </head>
 <body>
-    <div class="auth-container">
-        <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data" class="auth-form" onsubmit="showLoader()">
-            <h2>Upload New Video</h2>
+    <div class="upload-container">
+        <a href="/" class="back-link">
+            <svg width="16" height="16" style="margin-right: 0.5rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15,18 9,12 15,6"></polyline>
+            </svg>
+            Back to Home
+        </a>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h1>Upload Video</h1>
+            <span class="role-badge {{ user.role }}">{{ user.role }}</span>
+        </div>
+        
+        {% if success %}
+        <div class="alert alert-success">
+            <strong>✅ Success!</strong> {{ success }}
+        </div>
+        {% endif %}
+        
+        {% if error %}
+        <div class="alert alert-error">
+            <strong>❌ Error:</strong> {{ error }}
+        </div>
+        {% endif %}
+        
+        {% if user.role == 'teacher' %}
+        <div class="info-box">
+            <h4>📝 Teacher Upload Notice</h4>
+            <ul>
+                <li>Your uploaded videos will be pending admin approval</li>
+                <li>Videos become visible to students only after admin approval</li>
+                <li>You'll be notified about the approval status</li>
+            </ul>
+        </div>
+        {% elif user.role == 'admin' %}
+        <div class="info-box">
+            <h4>🔧 Admin Upload</h4>
+            <ul>
+                <li>Your videos also require approval (good practice)</li>
+                <li>You can approve videos via the <a href="/admin/dashboard">Admin Dashboard</a></li>
+                <li>This ensures content quality control</li>
+            </ul>
+        </div>
+        {% endif %}
+        
+        <form action="/upload" method="post" enctype="multipart/form-data" id="uploadForm">
+            <div class="form-group">
+                <label for="title">Lesson Title *</label>
+                <input type="text" id="title" name="title" required placeholder="Enter lesson title...">
+            </div>
             
-            <div id="loader" class="loader-container" style="display: none;">
-                <div class="loader-spinner"></div>
-                <p>Uploading, please wait... This may take a few minutes.</p>
+            <div class="form-group">
+                <label for="category">Category *</label>
+                <select id="category" name="category" required>
+                    <option value="">Select a category</option>
+                    <option value="Programming">Programming</option>
+                    <option value="Data Science">Data Science</option>
+                    <option value="Web Development">Web Development</option>
+                    <option value="Machine Learning">Machine Learning</option>
+                    <option value="Mathematics">Mathematics</option>
+                    <option value="Science">Science</option>
+                    <option value="Languages">Languages</option>
+                    <option value="Business">Business</option>
+                    <option value="Other">Other</option>
+                </select>
             </div>
-
-            {% if error %}
-            <div class="error-message">{{ error }}</div>
-            {% endif %}
-
-            <div id="form-content">
-                <div class="form-group">
-                    <label for="title">Lesson Title</label>
-                    <input type="text" id="title" name="title" required placeholder="e.g., Introduction to Python">
+            
+            <div class="form-group">
+                <label for="language">Language *</label>
+                <select id="language" name="language" required>
+                    <option value="">Select language</option>
+                    <option value="English">English</option>
+                    <option value="Hindi">Hindi</option>
+                    <option value="Spanish">Spanish</option>
+                    <option value="French">French</option>
+                    <option value="German">German</option>
+                    <option value="Chinese">Chinese</option>
+                    <option value="Japanese">Japanese</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="video_file">Video File *</label>
+                <div class="file-upload-area" onclick="document.getElementById('video_file').click()">
+                    <div class="upload-icon">📹</div>
+                    <p><strong>Click to select video</strong> or drag and drop</p>
+                    <p style="color: #666; font-size: 0.9rem;">Supported formats: MP4, WebM, MOV (Max: 100MB)</p>
+                    <input type="file" id="video_file" name="video_file" accept="video/mp4,video/webm,video/quicktime" required style="display: none;">
                 </div>
-                
-                <div class="form-group">
-                    <label for="category">Category</label>
-                    <input type="text" id="category" name="category" required placeholder="e.g., Programming, Data Science">
-                </div>
-                
-                <div class="form-group">
-                    <label for="language">Language</label>
-                    <input type="text" id="language" name="language" required placeholder="e.g., English, Hindi, Marathi">
-                </div>
-                
-                <div class="form-group">
-                    <label for="video_file">Video File</label>
-                    <input type="file" id="video_file" name="video_file" accept="video/*" required>
-                    <small style="color: var(--text-secondary); font-size: 0.8rem; display: block; margin-top: 0.5rem;">
-                        Supported formats: MP4, AVI, MOV, WebM. Max size: 100MB
-                    </small>
-                </div>
-                
-                <button id="upload-button" type="submit">Upload Video</button>
-                
-                <div style="margin-top: 1rem; text-align: center;">
-                    <a href="/" style="color: var(--primary-color); text-decoration: none; font-weight: 500;">
-                        ← Back to Dashboard
-                    </a>
+                <div id="file-info" style="margin-top: 0.5rem; font-size: 0.9rem; color: #666;"></div>
+            </div>
+            
+            <div class="upload-progress" id="uploadProgress">
+                <p>Uploading... <span id="progressText">0%</span></p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
                 </div>
             </div>
+            
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <span id="submitText">Upload Video</span>
+            </button>
         </form>
     </div>
 
     <script>
-        function showLoader() {
-            // Validate file size before showing loader
-            const fileInput = document.getElementById('video_file');
-            const file = fileInput.files[0];
-            
-            if (file) {
-                // Check file size (100MB = 100 * 1024 * 1024 bytes)
-                const maxSize = 100 * 1024 * 1024;
-                if (file.size > maxSize) {
-                    alert('File size too large. Please select a file smaller than 100MB.');
-                    return false;
-                }
-                
-                // Check file type
-                const allowedTypes = ['video/mp4', 'video/avi', 'video/mov', 'video/webm', 'video/quicktime', 'video/x-msvideo'];
-                if (!allowedTypes.includes(file.type)) {
-                    alert('Invalid file type. Please select a valid video file.');
-                    return false;
-                }
-            }
-            
-            // Show loader and hide form
-            document.getElementById('loader').style.display = 'block';
-            document.getElementById('form-content').style.display = 'none';
-            document.getElementById('upload-button').disabled = true;
-            
-            return true;
-        }
+        const fileInput = document.getElementById('video_file');
+        const fileInfo = document.getElementById('file-info');
+        const uploadArea = document.querySelector('.file-upload-area');
+        const form = document.getElementById('uploadForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitText = document.getElementById('submitText');
+        const uploadProgress = document.getElementById('uploadProgress');
         
-        // Add file validation on file select
-        document.getElementById('video_file').addEventListener('change', function(e) {
-            const file = e.target.files[0];
+        // File drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                updateFileInfo();
+            }
+        });
+        
+        fileInput.addEventListener('change', updateFileInfo);
+        
+        function updateFileInfo() {
+            const file = fileInput.files[0];
             if (file) {
-                // Display file info
-                const fileInfo = document.createElement('div');
-                fileInfo.style.marginTop = '0.5rem';
-                fileInfo.style.fontSize = '0.8rem';
-                fileInfo.style.color = 'var(--text-secondary)';
+                const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+                const isValid = file.size <= 100 * 1024 * 1024; // 100MB limit
+                
                 fileInfo.innerHTML = `
-                    Selected: ${file.name}<br>
-                    Size: ${(file.size / (1024 * 1024)).toFixed(2)} MB<br>
-                    Type: ${file.type}
+                    <strong>Selected:</strong> ${file.name}<br>
+                    <strong>Size:</strong> ${sizeInMB} MB
+                    ${!isValid ? '<br><span style="color: red;">⚠️ File too large! Maximum 100MB allowed.</span>' : ''}
                 `;
                 
-                // Remove previous file info if exists
-                const existingInfo = e.target.parentNode.querySelector('.file-info');
-                if (existingInfo) {
-                    existingInfo.remove();
-                }
+                submitBtn.disabled = !isValid;
+            }
+        }
+        
+        // Form submission with progress simulation
+        form.addEventListener('submit', (e) => {
+            const file = fileInput.files[0];
+            if (file && file.size > 100 * 1024 * 1024) {
+                e.preventDefault();
+                alert('File is too large! Maximum size allowed is 100MB.');
+                return;
+            }
+            
+            // Show upload progress
+            submitBtn.disabled = true;
+            submitText.textContent = 'Uploading...';
+            uploadProgress.style.display = 'block';
+            
+            // Simulate progress (since we can't track real upload progress easily)
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 90) progress = 90;
                 
-                fileInfo.className = 'file-info';
-                e.target.parentNode.appendChild(fileInfo);
+                document.getElementById('progressFill').style.width = progress + '%';
+                document.getElementById('progressText').textContent = Math.round(progress) + '%';
+            }, 500);
+            
+            // Clear interval after form submission
+            setTimeout(() => {
+                clearInterval(progressInterval);
+            }, 1000);
+        });
+        
+        // Validate form before submission
+        form.addEventListener('submit', (e) => {
+            const title = document.getElementById('title').value.trim();
+            const category = document.getElementById('category').value;
+            const language = document.getElementById('language').value;
+            const file = fileInput.files[0];
+            
+            if (!title || !category || !language || !file) {
+                e.preventDefault();
+                alert('Please fill in all required fields and select a video file.');
+                return;
             }
         });
     </script>

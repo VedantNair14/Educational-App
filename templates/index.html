@@ -34,7 +34,7 @@
                     <a href="#" class="nav-link">Courses</a>
                     <a href="#" class="nav-link">My Learning</a>
                     
-                    <!-- NEW DROPDOWN STRUCTURE -->
+                    <!-- Language Dropdown -->
                     <div class="dropdown">
                         <button onclick="toggleDropdown()" class="dropdown-btn">
                             Language
@@ -49,13 +49,17 @@
                             {% endfor %}
                         </div>
                     </div>
-                    <!-- END OF NEW DROPDOWN -->
 
                     {% if user %}
+                        <!-- Role-based navigation -->
                         {% if user.role == 'admin' %}
-                        <a href="/upload" class="nav-link">Upload</a>
+                            <a href="/upload" class="nav-link">Upload Video</a>
+                            <a href="/admin/dashboard" class="nav-link admin-link">Admin Dashboard</a>
+                        {% elif user.role == 'teacher' %}
+                            <a href="/upload" class="nav-link">Upload Video</a>
                         {% endif %}
-                        <span class="nav-link username">Welcome, {{ user.username }}</span>
+                        
+                        <span class="nav-link username">{{ user.username }} ({{ user.role.title() }})</span>
                         <a href="/logout" class="nav-link logout-button">Log Out</a>
                     {% else %}
                         <a href="/login" class="nav-link login-button">Log In</a>
@@ -63,54 +67,74 @@
                 </div>
             </nav>
             <div class="hero-section">
-                <h1>Unlock Your Potential !</h1>
+                <h1>Unlock Your Potential!</h1>
                 <p>High-quality video courses to help you master new skills.</p>
+                {% if user and user.role == 'teacher' %}
+                    <p class="teacher-notice">📝 Note: Your uploaded videos require admin approval before becoming visible to students.</p>
+                {% endif %}
             </div>
         </div>
     </header>
+    
     <main class="container">
-        <div class="video-grid">
-            <!-- The loop variable is 'lesson', not 'video' -->
-            {% for lesson in lessons %} 
-                <!-- The video-card div wraps everything -->
-                <div class="video-card">
-                    <div class="thumbnail-container" onclick="showLanguageSelector('lesson-{{ lesson.id }}')">
-                        <img class="thumbnail" src="https://res.cloudinary.com/df5edlmgq/video/upload/w_400,q_auto,f_auto/{{ lesson.videos[0].public_id if lesson.videos else '' }}.jpg" alt="Thumbnail for {{ lesson.title }}" loading="lazy">
-                        <div class="play-icon-overlay">
-                            <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="currentColor"><path d="M7 6v12l10-6z"></path></svg>
+        {% if lessons|length == 0 %}
+            <div class="no-content-message">
+                <h2>No approved videos available yet</h2>
+                {% if user.role == 'admin' %}
+                    <p>As an admin, you can <a href="/upload">upload videos</a> or check the <a href="/admin/dashboard">admin dashboard</a> for pending approvals.</p>
+                {% elif user.role == 'teacher' %}
+                    <p>As a teacher, you can <a href="/upload">upload videos</a> for admin approval.</p>
+                {% else %}
+                    <p>New videos are being added regularly. Please check back later!</p>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="video-grid">
+                {% for lesson in lessons %} 
+                    <div class="video-card">
+                        <div class="thumbnail-container" onclick="showLanguageSelector('lesson-{{ lesson.id }}')">
+                            <img class="thumbnail" src="https://res.cloudinary.com/df5edlmgq/video/upload/w_400,q_auto,f_auto/{{ lesson.videos[0].public_id if lesson.videos else '' }}.jpg" alt="Thumbnail for {{ lesson.title }}" loading="lazy">
+                            <div class="play-icon-overlay">
+                                <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="currentColor"><path d="M7 6v12l10-6z"></path></svg>
+                            </div>
+                        </div>
+                        <div class="video-info">
+                            <span class="video-category">{{ lesson.category }}</span>
+                            <h3 class="video-title">{{ lesson.title }}</h3>
+                            <p class="video-description">
+                                Available in: 
+                                {% for video in lesson.videos %}
+                                    {% if video.approval_status == 'approved' %}
+                                        {{ video.language }}{% if not loop.last %}, {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </p>
+                            <!-- Admin Delete Button -->
+                            {% if user.role == 'admin' %}
+                            <div class="admin-actions">
+                                <form action="/lesson/{{ lesson.id }}/delete" method="post" onsubmit="return confirm('Are you sure you want to delete this lesson and all its videos?');">
+                                    <button type="submit" class="delete-button">Delete Lesson</button>
+                                </form>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Language selector for each lesson -->
+                        <div id="lesson-{{ lesson.id }}" class="language-selector-popup" style="display:none;">
+                            <div class="language-selector-content">
+                                <h4>Select Language</h4>
+                                {% for video in lesson.videos %}
+                                    {% if video.approval_status == 'approved' %}
+                                        <button onclick="playVideo('{{ video.video_url }}')">{{ video.language }}</button>
+                                    {% endif %}
+                                {% endfor %}
+                                <button class="close-lang-selector" onclick="hideLanguageSelector('lesson-{{ lesson.id }}')">Close</button>
+                            </div>
                         </div>
                     </div>
-                    <div class="video-info">
-                        <span class="video-category">{{ lesson.category }}</span>
-                        <h3 class="video-title">{{ lesson.title }}</h3>
-                        <p class="video-description">
-                            Available in: 
-                            {% for video in lesson.videos %}
-                                {{ video.language }}{% if not loop.last %}, {% endif %}
-                            {% endfor %}
-                        </p>
-                        <!-- Correctly placed Delete Form -->
-                        {% if user.role == 'admin' %}
-                        <div class="admin-actions">
-                            <form action="/lesson/{{ lesson.id }}/delete" method="post" onsubmit="return confirm('Are you sure you want to delete this lesson and all its videos?');">
-                                <button type="submit" class="delete-button">Delete</button>
-                            </form>
-                        </div>
-                        {% endif %}
-                    </div>
-                    <!-- Hidden language selector for each lesson -->
-                    <div id="lesson-{{ lesson.id }}" class="language-selector-popup" style="display:none;">
-                        <div class="language-selector-content">
-                            <h4>Select Language</h4>
-                            {% for video in lesson.videos %}
-                                <button onclick="playVideo('{{ video.video_url }}')">{{ video.language }}</button>
-                            {% endfor %}
-                            <button class="close-lang-selector" onclick="hideLanguageSelector('lesson-{{ lesson.id }}')">Close</button>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
+                {% endfor %}
+            </div>
+        {% endif %}
     </main>
 
     <div id="video-popup" class="popup">
@@ -120,7 +144,6 @@
         </div>
     </div>
 
-    <!-- SCRIPT SECTION WITH DROPDOWN AND MENU JAVASCRIPT ADDED -->
     <script>
         const player = document.getElementById("player");
         const popup = document.getElementById("video-popup");
@@ -184,5 +207,57 @@
             }
         });
     </script>
+
+    <style>
+        /* Additional styles for role-based elements */
+        .admin-link {
+            background-color: #dc3545;
+            color: white !important;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        .admin-link:hover {
+            background-color: #c82333;
+        }
+        
+        .teacher-notice {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+        }
+        
+        .no-content-message {
+            text-align: center;
+            padding: 3rem 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+        
+        .no-content-message h2 {
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+        
+        .no-content-message a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .no-content-message a:hover {
+            text-decoration: underline;
+        }
+        
+        .username {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+    </style>
 </body>
 </html>
