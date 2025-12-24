@@ -5,79 +5,110 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login | Educational Zone</title>
     <link rel="stylesheet" href="/static/style.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   </head>
   <body>
     <div class="split-screen-container">
-      <div class="orb orb-1"></div>
-      <div class="orb orb-2"></div>
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
 
       <div class="hero-side">
-        <div class="brand-badge">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-            <path d="M2 17l10 5 10-5"></path>
-            <path d="M2 12l10 5 10-5"></path>
-          </svg>
-          Educational Zone
+        <div class="brand-pill">
+          <span style="color: var(--aurora-3)">✨ New</span>
+          <span>Platform 2.0</span>
         </div>
-        <h1 class="hero-title">Unlock Your<br />Full Potential.</h1>
-        <p class="hero-subtext">
-          Access high-quality video courses, track your progress, and master new skills with our
-          advanced learning platform.
+        <h1 class="hero-display-text">
+          Master Skills.<br />
+          <span class="hero-gradient-text">Unlock Future.</span>
+        </h1>
+        <p
+          style="
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            max-width: 400px;
+          "
+        >
+          Join thousands of students learning Logistics, Coding, and Business strategies on the #1
+          educational platform.
         </p>
       </div>
 
       <div class="form-side">
-        <div class="glass-card">
-          <h2>Welcome Back</h2>
-          <p class="subtitle">Enter your credentials to access your account.</p>
+        <div class="login-card">
+          <div class="login-header">
+            <h2>Welcome Back</h2>
+            <p>Enter your credentials to access your courses.</p>
+          </div>
 
           <form action="/login" method="post">
             {% if error %}
-            <div class="error-message">{{ error }}</div>
+            <div
+              style="
+                background: rgba(255, 71, 87, 0.1);
+                color: #ff4757;
+                padding: 10px;
+                border-radius: 8px;
+                margin-bottom: 1rem;
+                text-align: center;
+              "
+            >
+              {{ error }}
+            </div>
             {% endif %}
 
-            <div class="input-group">
-              <label for="username">Username</label>
+            <div style="margin-bottom: 1.5rem">
+              <label
+                style="
+                  display: block;
+                  color: var(--text-secondary);
+                  margin-bottom: 0.5rem;
+                  font-size: 0.9rem;
+                "
+                >Username</label
+              >
               <input
                 type="text"
-                id="username"
                 name="username"
+                class="input-field"
                 placeholder="e.g. vedant_nair"
                 required
-                autocomplete="username"
               />
             </div>
 
-            <div class="input-group">
-              <label for="password">Password</label>
+            <div style="margin-bottom: 2rem">
+              <label
+                style="
+                  display: block;
+                  color: var(--text-secondary);
+                  margin-bottom: 0.5rem;
+                  font-size: 0.9rem;
+                "
+                >Password</label
+              >
               <input
                 type="password"
-                id="password"
                 name="password"
+                class="input-field"
                 placeholder="••••••••"
                 required
-                autocomplete="current-password"
               />
             </div>
 
-            <button type="submit" class="btn-primary">Log In</button>
+            <button type="submit" class="btn-glow">LOG IN</button>
 
-            <div class="switch-auth">
-              Don't have an account? <a href="/register">Register here</a>
-            </div>
+            <p
+              style="
+                text-align: center;
+                margin-top: 1.5rem;
+                color: var(--text-secondary);
+                font-size: 0.9rem;
+              "
+            >
+              New here?
+              <a href="/register" style="color: var(--aurora-3); font-weight: 600"
+                >Create Account</a
+              >
+            </p>
           </form>
         </div>
       </div>

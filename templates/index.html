@@ -3,15 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Education Demo | Online Video Courses</title>
-    <meta name="description" content="Unlock your potential with high-quality video courses." />
-
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
+    <title>Dashboard | Educational Zone</title>
     <link rel="stylesheet" href="/static/style.css" />
   </head>
   <body>
@@ -22,25 +14,6 @@
             <svg
               class="logo-icon"
               xmlns="http://www.w3.org/2000/svg"
-              width="28"
-              height="28"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-              <path d="M2 17l10 5 10-5"></path>
-              <path d="M2 12l10 5 10-5"></path>
-            </svg>
-            <span>Educational Zone</span>
-          </div>
-
-          <button class="menu-toggle" onclick="toggleMenu()">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
               width="24"
               height="24"
               viewBox="0 0 24 24"
@@ -50,11 +23,11 @@
               stroke-linecap="round"
               stroke-linejoin="round"
             >
-              <line x1="3" y1="12" x2="21" y2="12"></line>
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <line x1="3" y1="18" x2="21" y2="18"></line>
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
             </svg>
-          </button>
+            <span>Educational Zone</span>
+          </div>
 
           <div class="navbar-links">
             <a href="#" class="nav-link">Courses</a>
@@ -63,9 +36,10 @@
             <div class="dropdown">
               <button onclick="toggleDropdown()" class="dropdown-btn">
                 <svg
+                  class="lang-icon"
                   xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
+                  width="24"
+                  height="24"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -79,12 +53,12 @@
                     d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
                   ></path>
                 </svg>
-                <span>Language</span>
+                <span>EN</span>
                 <svg
                   class="chevron"
                   xmlns="http://www.w3.org/2000/svg"
-                  width="14"
-                  height="14"
+                  width="24"
+                  height="24"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -104,16 +78,14 @@
             </div>
 
             {% if user %} {% if user.role == 'admin' %}
-            <a href="/upload" class="nav-link">Upload</a>
-            <a href="/admin/dashboard" class="nav-link admin-link">Dashboard</a>
-            {% elif user.role == 'teacher' %}
-            <a href="/upload" class="nav-link">Upload</a>
+            <a href="/upload" class="nav-link" style="color: var(--aurora-3)">+ Upload</a>
+            <a href="/admin/dashboard" class="nav-link">Admin</a>
             {% endif %}
 
             <span class="nav-user">{{ user.username }}</span>
-            <a href="/logout" class="nav-link logout-button">Log Out</a>
+            <a href="/logout" class="logout-button">Log Out</a>
             {% else %}
-            <a href="/login" class="nav-link login-button">Log In</a>
+            <a href="/login" class="nav-link">Log In</a>
             {% endif %}
           </div>
         </nav>
@@ -121,78 +93,113 @@
     </header>
 
     <div class="hero-section">
-      <div class="container">
-        <h1 class="hero-title">Unlock Your Potential!</h1>
-        <p class="hero-subtitle">Master new skills with our high-quality video library.</p>
-        {% if user and user.role == 'teacher' %}
-        <div class="teacher-notice">📝 Note: Your uploads require admin approval.</div>
-        {% endif %}
-      </div>
+      <h1 class="hero-title">Unlock Your Potential.</h1>
+      <p class="hero-subtitle">Master new skills with our high-quality video library.</p>
     </div>
 
     <main class="container main-content">
       {% if lessons|length == 0 %}
-      <div class="no-content-message">
-        <h2>No videos available yet</h2>
-        <p>Check back later for new courses.</p>
+      <div style="text-align: center; padding: 4rem; color: var(--text-secondary)">
+        <h2>No videos found.</h2>
       </div>
       {% else %}
       <div class="video-grid">
         {% for lesson in lessons %}
         <div class="video-card">
+          {% if user.role == 'admin' %}
+          <form
+            action="/lesson/{{ lesson.id }}/delete"
+            method="post"
+            onsubmit="return confirm('Delete this lesson?');"
+          >
+            <button type="submit" class="delete-icon-btn" title="Delete Lesson">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path
+                  d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                ></path>
+              </svg>
+            </button>
+          </form>
+          {% endif %}
+
           <div class="thumbnail-container" onclick="showLanguageSelector('lesson-{{ lesson.id }}')">
             <img
               class="thumbnail"
               src="https://res.cloudinary.com/df5edlmgq/video/upload/w_400,q_auto,f_auto/{{ lesson.videos[0].public_id if lesson.videos else '' }}.jpg"
-              alt="{{ lesson.title }}"
-              loading="lazy"
+              alt="Thumbnail"
             />
             <div class="play-icon-overlay">
               <svg
                 class="play-icon"
                 xmlns="http://www.w3.org/2000/svg"
-                width="64"
-                height="64"
                 viewBox="0 0 24 24"
                 fill="currentColor"
               >
-                <path d="M7 6v12l10-6z"></path>
+                <path d="M8 5v14l11-7z" />
               </svg>
             </div>
           </div>
+
           <div class="video-info">
-            <span class="video-category">{{ lesson.category }}</span>
-            <h3 class="video-title">{{ lesson.title }}</h3>
-            <p class="video-description">
-              Languages: {% for video in lesson.videos %} {% if video.approval_status == 'approved'
-              %} {{ video.language }}{% if not loop.last %}, {% endif %} {% endif %} {% endfor %}
-            </p>
-            {% if user.role == 'admin' %}
-            <div class="admin-actions">
-              <form
-                action="/lesson/{{ lesson.id }}/delete"
-                method="post"
-                onsubmit="return confirm('Delete this lesson?');"
-              >
-                <button type="submit" class="delete-button">Delete</button>
-              </form>
+            <div class="video-meta">
+              <span class="video-category">{{ lesson.category }}</span>
+              <span class="video-lang-badge">
+                {% for video in lesson.videos %} {{ video.language }}{% if not loop.last %}, {%
+                endif %} {% endfor %}
+              </span>
             </div>
-            {% endif %}
+            <h3 class="video-title">{{ lesson.title }}</h3>
           </div>
 
-          <div id="lesson-{{ lesson.id }}" class="language-selector-popup" style="display: none">
-            <div class="language-selector-content">
-              <h4>Select Audio Language</h4>
-              {% for video in lesson.videos %} {% if video.approval_status == 'approved' %}
-              <button onclick="playVideo('{{ video.video_url }}')">{{ video.language }}</button>
-              {% endif %} {% endfor %}
-              <button
-                class="close-lang-selector"
-                onclick="hideLanguageSelector('lesson-{{ lesson.id }}')"
-              >
-                Cancel
-              </button>
-            </div>
+          <div
+            id="lesson-{{ lesson.id }}"
+            class="language-selector-popup"
+            style="
+              display: none;
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              background: rgba(5, 5, 17, 0.95);
+              z-index: 50;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+            "
+          >
+            <h4 style="color: white; margin-bottom: 1rem">Select Language</h4>
+            {% for video in lesson.videos %}
+            <button
+              onclick="playVideo('{{ video.video_url }}')"
+              style="
+                padding: 10px 20px;
+                margin: 5px;
+                background: var(--aurora-1);
+                color: white;
+                border-radius: 8px;
+              "
+            >
+              {{ video.language }}
+            </button>
+            {% endfor %}
+            <button
+              onclick="hideLanguageSelector('lesson-{{ lesson.id }}')"
+              style="margin-top: 1rem; color: var(--text-secondary)"
+            >
+              Close
+            </button>
           </div>
         </div>
         {% endfor %}
@@ -200,34 +207,57 @@
       {% endif %}
     </main>
 
-    <div id="video-popup" class="popup">
-      <span class="close-button" onclick="closePopup()">&times;</span>
-      <div class="video-wrapper">
-        <video id="player" controls autoplay></video>
+    <div
+      id="video-popup"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.95);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+      "
+    >
+      <span
+        onclick="closePopup()"
+        style="
+          position: absolute;
+          top: 20px;
+          right: 30px;
+          font-size: 3rem;
+          color: white;
+          cursor: pointer;
+        "
+        >&times;</span
+      >
+      <div style="width: 90%; max-width: 1000px">
+        <video
+          id="player"
+          controls
+          style="width: 100%; border-radius: 12px; box-shadow: 0 0 50px rgba(121, 40, 202, 0.3)"
+        ></video>
       </div>
     </div>
 
     <script>
       const player = document.getElementById('player');
       const popup = document.getElementById('video-popup');
-      const navbarLinks = document.querySelector('.navbar-links');
 
-      function playVideo(filename) {
+      function playVideo(url) {
         document
           .querySelectorAll('.language-selector-popup')
           .forEach((p) => (p.style.display = 'none'));
-        player.src = filename.startsWith('http') ? filename : `/video/${filename}`;
+        player.src = url.startsWith('http') ? url : `/video/${url}`;
         popup.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
       }
-
       function closePopup() {
         popup.style.display = 'none';
         player.pause();
-        player.src = '';
-        document.body.style.overflow = 'auto';
       }
-
       function showLanguageSelector(id) {
         document.getElementById(id).style.display = 'flex';
       }
@@ -237,12 +267,10 @@
       function toggleDropdown() {
         document.getElementById('language-dropdown').classList.toggle('show');
       }
-      function toggleMenu() {
-        navbarLinks.classList.toggle('active');
-      }
 
-      window.onclick = function (event) {
-        if (!event.target.closest('.dropdown-btn')) {
+      // Close dropdown when clicking outside
+      window.onclick = function (e) {
+        if (!e.target.closest('.dropdown-btn')) {
           var dropdowns = document.getElementsByClassName('dropdown-content');
           for (var i = 0; i < dropdowns.length; i++) {
             if (dropdowns[i].classList.contains('show')) dropdowns[i].classList.remove('show');
